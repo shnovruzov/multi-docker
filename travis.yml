@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t shnovruzov/docker-react -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true shnovruzov/docker-react npm run test -- --coverage
+
+after_success:
+  - docker build -t shnovruzov/multi-react ./client
+  - docker build -t shnovruzov/multi-nginx ./nginx
+  - docker build -t shnovruzov/multi-server ./server
+  - docker build -t shnovruzov/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push shnovruzov/multi-react
+  - docker push shnovruzov/multi-nginx
+  - docker push shnovruzov/multi-server
+  - docker push shnovruzov/multi-worker
