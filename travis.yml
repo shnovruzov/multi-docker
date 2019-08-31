@@ -6,15 +6,17 @@ before_install:
   - docker build -t shnovruzov/react-test -f ./client/Dockerfile.dev ./client
 
 script:
-  - docker run -e CI=true shnovruzov/react-test npm run test -- --coverage
+  - docker run shnovruzov/react-test npm test -- --coverage
 
 after_success:
-  - docker build -t shnovruzov/multi-react ./client
+  - docker build -t shnovruzov/multi-client ./client
   - docker build -t shnovruzov/multi-nginx ./nginx
   - docker build -t shnovruzov/multi-server ./server
   - docker build -t shnovruzov/multi-worker ./worker
+  # Log in to the docker CLI
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
-  - docker push shnovruzov/multi-react
+  # Take those images and push them to docker hub
+  - docker push shnovruzov/multi-client
   - docker push shnovruzov/multi-nginx
   - docker push shnovruzov/multi-server
   - docker push shnovruzov/multi-worker
